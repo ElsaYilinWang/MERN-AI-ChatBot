@@ -1,12 +1,7 @@
-Hello, Hope everything is working fine 😅
+# AI SaaS Chat Bot using MERN Stack
+ref: https://www.youtube.com/watch?v=wrHTcjSZQ1Y
 
-# Check appropriate branches.
-Check appropriate branches where you need to find the code.
-
-# Starting project 
-Includes base project template for NodeJs, MongoDB, Typescript and Lint
-
-# Final
-Includes final code. 😃
-
-Feel Free to share any doubts or corrections.
+## Backend
+- Setup Node, Express App w/ TypeScript
+- Integrate MongoDB connection
+- 
