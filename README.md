@@ -37,3 +37,6 @@ User sneds back the cookie
 
     -> if the cookie doesn't match and token is invalid -> Abort the operation
 
+# Frontend
+Vite.js
+Get started: https://vitejs.dev/guide/
