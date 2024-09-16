@@ -7,3 +7,5 @@ ref: https://www.youtube.com/watch?v=wrHTcjSZQ1Y
 - Register Login on OpenAI portal, get API keys
 - Build a Secure Authentication with Tokens, and HTTP-only signed cookies
 
+## Database Models
+- User : name, email, password, chats: Chat[]
