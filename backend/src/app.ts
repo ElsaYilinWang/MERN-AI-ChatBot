@@ -5,6 +5,7 @@ import { config } from "dotenv";
 // ref: https://stackoverflow.com/questions/73738113/cannot-find-module-morgan-and-but-i-see-morgan-exists-as-dependencies-in-my-pa
 import morgan from "morgan";
 import appRouter from "./routes/index.js";
+import cookieParser from "cookie-parser";
 
 config();
 
@@ -12,6 +13,8 @@ const app = express();
 
 // middleware
 app.use(express.json());
+// cookie
+app.use(cookieParser(process.env.COOKIE_SECRET));
 
 
 // remove in production

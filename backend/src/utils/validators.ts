@@ -3,7 +3,7 @@
 import { NextFunction, Request, Response } from "express";
 import { body, ValidationChain, validationResult } from "express-validator";
 
-// create a custom validate
+// create a custom validate for the validation chain
 export const validate = (validations: ValidationChain[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
         for (let validation of validations){
@@ -20,10 +20,16 @@ export const validate = (validations: ValidationChain[]) => {
     };
 };
 
+// create a validator for login 
+export const loginValidator = [
+    
+    body("email").trim().isEmail().withMessage("Email is required"),
+    body("password").trim().isLength({ min: 6}).withMessage("Password should contain at least 6 characters"),
+];
+
 
 // create a validator for signup process: name, email, password
 export const signupValidator = [
     body("name").notEmpty().withMessage("Name is required"),
-    body("email").trim().isEmail().withMessage("Email is required"),
-    body("password").trim().isLength({ min: 6}).withMessage("Password should contain at least 6 characters"),
+    ...loginValidator
 ];
