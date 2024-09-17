@@ -38,5 +38,21 @@ User sneds back the cookie
     -> if the cookie doesn't match and token is invalid -> Abort the operation
 
 # Frontend
-Vite.js
+- Vite.js
 Get started: https://vitejs.dev/guide/
+
+- Google Fonts: https://fonts.google.com/
+
+-- Below are some dependencies to install
+
+- Material UI > installation: https://mui.com/material-ui/getting-started/installation/
+cd to your project (.\frontend\) and install
+
+- React icon: https://www.npmjs.com/package/react-icons
+cd to your project (.\frontend\) and install
+
+- React router dom: https://reactrouter.com/en/main/start/tutorial
+cd to your project (.\frontend\) and install
+
+- React hot toaster: https://react-hot-toast.com/docs
+cd to your project (.\frontend\) and install
