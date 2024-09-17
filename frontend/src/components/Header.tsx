@@ -4,13 +4,16 @@ import { AppBar, Toolbar } from "@mui/material";
 // sx: https://mui.com/system/getting-started/the-sx-prop/
 
 import React from "react";
+import Logo from "./shared/Logo";
 
 const Header = () => {
   return (
     <AppBar
       sx={{ bgcolor: "transparent", position: "static", boxShadow: "none" }}
     >
-      <Toolbar sx={{ display: "flex" }}></Toolbar>
+      <Toolbar sx={{ display: "flex" }}>
+        <Logo />
+      </Toolbar>
     </AppBar>
   );
 };
