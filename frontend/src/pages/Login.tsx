@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Button } from "@mui/material";
 import React from "react";
 import CustomizedInput from "../components/shared/CustomizedInput";
 
@@ -43,6 +43,23 @@ const Login = () => {
             </Typography>
             <CustomizedInput name="email" type="email" label="Email" />
             <CustomizedInput name="password" type="password" label="Password" />
+            <Button
+              type="submit"
+              sx={{
+                px: 2,
+                py: 1,
+                mt: 2,
+                width: "400px",
+                borderRadius: 2,
+                bgcolor: "#00fffc",
+                ":hover": {
+                  bgcolor: "white",
+                  color: "black",
+                },
+              }}
+            >
+              LOGIN
+            </Button>
           </Box>
         </form>
       </Box>
