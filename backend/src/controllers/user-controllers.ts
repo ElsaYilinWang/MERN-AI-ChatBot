@@ -54,14 +54,12 @@ export const userSignup = async (
     // issue: This expression is not callable. Type 'Number' has no call signatures
     // solution: import { Response } from "express"
     // ref: https://stackoverflow.com/questions/60463324/this-expression-is-not-callable-type-number-has-no-call-signatures
-    return res
-      .status(200)
-      .json({
-        message: "OK",
-        id: user._id.toString(),
-        name: user.name,
-        email: user.email,
-      });
+    return res.status(200).json({
+      message: "OK",
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+    });
 
     // issue: 'error' is of Type 'Unknown'
     // solution: narrow down error's type by " error: any"
@@ -112,14 +110,44 @@ export const userLogin = async (
     });
 
     // if all pass validation checks
-    return res
-      .status(200)
-      .json({
-        message: "OK",
-        id: user._id.toString(),
-        name: user.name,
-        email: user.email,
-      });
+    return res.status(200).json({
+      message: "OK",
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+    });
+  } catch (error: any) {
+    console.log(error);
+    return res.status(404).json({ message: "ERROR", cause: error.message });
+  }
+};
+
+export const verifyUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // find user by id
+    const user = await User.findById(res.locals.jwtData.id);
+
+    if (!user) {
+      return res
+        .status(401)
+        .send("User not registered OR token malfunctioned.");
+    }
+
+    if (user._id.toString() !== res.locals.jwtData.id) {
+      return res.status(401).send("Permission didn't match.");
+    }
+
+    // if all pass validation checks
+    return res.status(200).json({
+      message: "OK",
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+    });
   } catch (error: any) {
     console.log(error);
     return res.status(404).json({ message: "ERROR", cause: error.message });
