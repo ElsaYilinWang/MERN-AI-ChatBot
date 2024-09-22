@@ -79,3 +79,37 @@ export const sendChatsToUser = async (
     return res.status(404).json({ message: "ERROR", cause: error.message });
   }
 };
+
+export const deleteChats = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // find user by id
+    const user = await User.findById(res.locals.jwtData.id);
+
+    if (!user) {
+      return res
+        .status(401)
+        .send("User not registered OR token malfunctioned.");
+    }
+
+    if (user._id.toString() !== res.locals.jwtData.id) {
+      return res.status(401).send("Permission didn't match.");
+    }
+    // set user's chats back to an empty array and save === delete
+    //@ts-ignore
+    user.chats = [];
+    await user.save();
+
+    // if all pass validation checks
+    return res.status(200).json({
+      message: "OK",
+      // no user chats required
+    });
+  } catch (error: any) {
+    console.log(error);
+    return res.status(404).json({ message: "ERROR", cause: error.message });
+  }
+};

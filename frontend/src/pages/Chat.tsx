@@ -1,10 +1,15 @@
 import { Avatar, Box, Button, IconButton, Typography } from "@mui/material";
-import { useRef, useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { red } from "@mui/material/colors";
 import ChatItem from "../components/chat/ChatItem";
 import { IoMdSend } from "react-icons/io";
-import { sendChatRequest } from "../helpers/api-communicator";
+import {
+  deleteUserChats,
+  getUserChats,
+  sendChatRequest,
+} from "../helpers/api-communicator";
+import toast from "react-hot-toast";
 /*
 const chatMessages = [
   {
@@ -56,8 +61,36 @@ const Chat = () => {
     setChatMessages((prev) => [...prev, newMessage]);
     const chatData = await sendChatRequest(content);
     setChatMessages([...chatData.chats]);
-    // 
+    //
   };
+
+  const handleDeleteChats = async () => {
+    try {
+      toast.loading("Deleting Chats", { id: "deletechats" });
+      await deleteUserChats();
+      setChatMessages([]);
+      toast.success("Deleted Chats Successfully", { id: "deletechats" });
+    } catch (error) {
+      console.log(error);
+      toast.error("Deleting chats failed", { id: "deletechats" });
+    }
+  };
+
+  useLayoutEffect(() => {
+    if (auth?.isLoggedIn && auth.user) {
+      toast.loading("Loading Chats", { id: "loadchats" });
+      getUserChats()
+        .then((data) => {
+          setChatMessages([...data.chats]);
+          toast.success("Successfully loaded chats", { id: "loadchats" });
+        })
+        .catch((err) => {
+          console.log(err);
+          toast.error("Loading Failed", { id: "loadchats" });
+        });
+    }
+  }, [auth]);
+
   return (
     <Box
       sx={{
@@ -105,7 +138,7 @@ const Chat = () => {
           <Typography sx={{ mx: "auto", fontFamily: "work sans", my: 4, p: 3 }}>
             You can ask questions but please avoid sharing personal information.
           </Typography>
-          <Button
+          <Button onClick={handleDeleteChats}
             sx={{
               width: "200px",
               my: "auto",
