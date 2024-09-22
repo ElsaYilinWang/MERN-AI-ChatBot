@@ -1,8 +1,17 @@
-import { Avatar, Box, Button, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Button,
+  Icon,
+  IconButton,
+  Input,
+  Typography,
+} from "@mui/material";
 import React from "react";
 import { useAuth } from "../context/AuthContext";
 import { red } from "@mui/material/colors";
 import ChatItem from "../components/chat/ChatItem";
+import { IoMdSend } from "react-icons/io";
 
 const chatMessages = [
   {
@@ -142,6 +151,33 @@ const Chat = () => {
             <ChatItem content={chat.content} role={chat.role} key={index} />
           ))}
         </Box>
+        <div
+          style={{
+            width: "100%",
+            padding: "20px",
+            borderRadius: 8,
+            backgroundColor: "rgb(17, 27, 39)",
+            display: "flex",
+            margin: "auto",
+          }}
+        >
+          {" "}
+          <input
+            type="text"
+            style={{
+              width: "100%",
+              backgroundColor: "transparent",
+              padding: "10px",
+              border: "none",
+              outline: "none",
+              color: "white",
+              fontSize: "20px",
+            }}
+          />
+        </div>
+        <IconButton sx={{ ml: "auto", color: "white" }}>
+          <IoMdSend />
+        </IconButton>
       </Box>
     </Box>
   );
