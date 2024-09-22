@@ -7,6 +7,7 @@ import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
 import { useAuth } from "./context/AuthContext";
 
+
 const auth = useAuth();
 
 function App() {
@@ -22,7 +23,9 @@ function App() {
         )}
         <Route path="*" element={<NotFound />} />
       </Routes>
+      
     </main>
+    
   );
 }
 
