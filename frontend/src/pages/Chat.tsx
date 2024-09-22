@@ -1,5 +1,5 @@
 import { Avatar, Box, Button, IconButton, Typography } from "@mui/material";
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { red } from "@mui/material/colors";
 import ChatItem from "../components/chat/ChatItem";
@@ -10,6 +10,7 @@ import {
   sendChatRequest,
 } from "../helpers/api-communicator";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
 /*
 const chatMessages = [
   {
@@ -49,6 +50,7 @@ type Message = {
   content: string;
 };
 const Chat = () => {
+  const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const auth = useAuth();
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
@@ -88,6 +90,12 @@ const Chat = () => {
           console.log(err);
           toast.error("Loading Failed", { id: "loadchats" });
         });
+    }
+  }, [auth]);
+
+  useEffect(() => {
+    if (!auth?.user) {
+      return navigate("/login");
     }
   }, [auth]);
 
@@ -138,7 +146,8 @@ const Chat = () => {
           <Typography sx={{ mx: "auto", fontFamily: "work sans", my: 4, p: 3 }}>
             You can ask questions but please avoid sharing personal information.
           </Typography>
-          <Button onClick={handleDeleteChats}
+          <Button
+            onClick={handleDeleteChats}
             sx={{
               width: "200px",
               my: "auto",

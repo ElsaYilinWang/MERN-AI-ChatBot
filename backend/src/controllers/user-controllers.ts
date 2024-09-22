@@ -97,7 +97,7 @@ export const userLogin = async (
       signed: true,
     });
 
-    // Authenytication Process: create token and store cookie
+    // Authentication Process: create token and store cookie
     const token = createToken(user._id.toString(), user.email, "7d");
     const expires = new Date();
     expires.setDate(expires.getDate() + 7);
@@ -140,6 +140,45 @@ export const verifyUser = async (
     if (user._id.toString() !== res.locals.jwtData.id) {
       return res.status(401).send("Permission didn't match.");
     }
+
+    // if all pass validation checks
+    return res.status(200).json({
+      message: "OK",
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+    });
+  } catch (error: any) {
+    console.log(error);
+    return res.status(404).json({ message: "ERROR", cause: error.message });
+  }
+};
+
+export const userLogout = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // find user by id
+    const user = await User.findById(res.locals.jwtData.id);
+
+    if (!user) {
+      return res
+        .status(401)
+        .send("User not registered OR token malfunctioned.");
+    }
+
+    if (user._id.toString() !== res.locals.jwtData.id) {
+      return res.status(401).send("Permission didn't match.");
+    }
+
+    res.clearCookie(COOKIE_NAME, {
+      path: "/",
+      domain: "localhost",
+      httpOnly: true,
+      signed: true,
+    });
 
     // if all pass validation checks
     return res.status(200).json({
