@@ -56,3 +56,6 @@ cd to your project (.\frontend\) and install
 
 - React hot toaster: https://react-hot-toast.com/docs
 cd to your project (.\frontend\) and install
+
+- React syntax highlighter: https://www.npmjs.com/package/react-syntax-highlighter
+cd to your project (.\frontend\) and install
