@@ -59,3 +59,6 @@ cd to your project (.\frontend\) and install
 
 - React syntax highlighter: https://www.npmjs.com/package/react-syntax-highlighter
 cd to your project (.\frontend\) and install
+
+- React type animation: https://www.npmjs.com/package/react-type-animation
+cd to your project (.\frontend\) and install
