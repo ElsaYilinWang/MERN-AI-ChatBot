@@ -1,18 +1,11 @@
-import {
-  Avatar,
-  Box,
-  Button,
-  Icon,
-  IconButton,
-  Input,
-  Typography,
-} from "@mui/material";
-import React from "react";
+import { Avatar, Box, Button, IconButton, Typography } from "@mui/material";
+import { useRef, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { red } from "@mui/material/colors";
 import ChatItem from "../components/chat/ChatItem";
 import { IoMdSend } from "react-icons/io";
-
+import { sendChatRequest } from "../helpers/api-communicator";
+/*
 const chatMessages = [
   {
     role: "user",
@@ -45,9 +38,26 @@ const chatMessages = [
     content: "Yes, thank you! That really helps.",
   },
 ];
-
+*/
+type Message = {
+  role: "user" | "assistant";
+  content: string;
+};
 const Chat = () => {
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const auth = useAuth();
+  const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const handleSubmit = async () => {
+    const content = inputRef.current?.value as string;
+    if (inputRef && inputRef.current) {
+      inputRef.current.value = "";
+    }
+    const newMessage: Message = { role: "user", content };
+    setChatMessages((prev) => [...prev, newMessage]);
+    const chatData = await sendChatRequest(content);
+    setChatMessages([...chatData.chats]);
+    // 
+  };
   return (
     <Box
       sx={{
@@ -148,6 +158,9 @@ const Chat = () => {
           }}
         >
           {chatMessages.map((chat, index) => (
+            //@ts-ignore
+            // this comment enables the TypeScript compiler to ignore the line below it.
+            // otherwise, role will have a type error
             <ChatItem content={chat.content} role={chat.role} key={index} />
           ))}
         </Box>
@@ -163,6 +176,7 @@ const Chat = () => {
         >
           {" "}
           <input
+            ref={inputRef}
             type="text"
             style={{
               width: "100%",
@@ -175,7 +189,7 @@ const Chat = () => {
             }}
           />
         </div>
-        <IconButton sx={{ ml: "auto", color: "white" }}>
+        <IconButton onClick={handleSubmit} sx={{ ml: "auto", color: "white" }}>
           <IoMdSend />
         </IconButton>
       </Box>
