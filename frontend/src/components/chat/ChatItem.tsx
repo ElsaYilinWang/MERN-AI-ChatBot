@@ -1,8 +1,10 @@
 import { Avatar, Box, Typography } from "@mui/material";
-import React from "react";
+import React, { useLayoutEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { coldarkDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import { getUserChats } from "../../helpers/api-communicator";
+import toast from "react-hot-toast";
 
 function extractCodeFromString(message: string) {
   if (message.includes("```")) {
@@ -36,6 +38,22 @@ const ChatItem = ({
 }) => {
   const messageBlocks = extractCodeFromString(content);
   const auth = useAuth();
+
+  useLayoutEffect(() => {
+    if (auth?.isLoggedIn && auth.user) {
+      toast.loading("Loading Chats", { id: "loadchats" });
+      getUserChats()
+        .then((data) => {
+          setChatMessages([...data.chats]);
+          toast.success("Successfully loaded chats", { id: "loadchats" });
+        })
+        .catch((err) => {
+          console.log(err);
+          toast.error("Loading Failed", { id: "loadchats" });
+        });
+    }
+  }, [auth]);
+
   return role === "assistant" ? (
     <Box sx={{ display: "flex", p: 2, bgcolor: "#004d5612", my: 2, gap: 2 }}>
       <Avatar sx={{ ml: "0" }}>
@@ -85,3 +103,6 @@ const ChatItem = ({
 };
 
 export default ChatItem;
+function setChatMessages(arg0: any[]) {
+  throw new Error("Function not implemented.");
+}
