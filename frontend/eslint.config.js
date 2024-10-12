@@ -1,3 +1,6 @@
+// ESLint is a tool for identifying and reporting on patterns found in ECMAScript/JavaScript code, 
+// with the goal of making code more consistent and avoiding bugs.
+// Prerequisites: installed Node.js
 import js from '@eslint/js'
 import globals from 'globals'
 import reactHooks from 'eslint-plugin-react-hooks'

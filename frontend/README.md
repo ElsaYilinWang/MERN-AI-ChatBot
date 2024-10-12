@@ -48,3 +48,7 @@ export default tseslint.config({
   },
 })
 ```
+## package.json VS package-lock.json
+see this article:
+https://umarfarooquekhan.medium.com/difference-between-package-json-and-package-lock-json-6225f83f247c
+
