@@ -7,7 +7,10 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  // useNavigate is a hook from react-router-dom that provides a way to programmatically navigate between routes in the application.
+  // It’s really handy for redirecting users after actions like form submissions or button clicks.
   const navigate = useNavigate();
+
   const auth = useAuth();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

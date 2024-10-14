@@ -49,7 +49,7 @@ type Message = {
   role: "user" | "assistant";
   content: string;
 };
-const Chat = () => {
+const Chat: React.FC = () => {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const auth = useAuth();

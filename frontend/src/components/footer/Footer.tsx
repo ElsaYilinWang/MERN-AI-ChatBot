@@ -1,5 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
+// Link from react-router-dom is used to create navigational links in the React application
+// that are aware of the routing context.
+// It’s a great way to handle client-side navigation without refreshing the page.
+
+
 
 const Footer = () => {
   return (
@@ -14,7 +19,7 @@ const Footer = () => {
         }}
       >
         <p style={{ fontSize: "30px", textAlign: "center", padding: "30px" }}>
-          Built with love by Elsa, ref:
+          Built with love by Elsa, reference:
           <span>
             <Link
               style={{ color: "white" }}

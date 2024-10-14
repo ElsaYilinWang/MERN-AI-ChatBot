@@ -3,10 +3,13 @@ import React from "react";
 import TypingAnim from "../components/typer/TypingAnim";
 import Footer from "../components/footer/Footer";
 
-const Home = () => {
+const Home: React.FC = () => { 
+  // React.FC (or React.FunctionComponent) is a type definition for functional components in TypeScript. 
+  // It provides type-checking and better autocompletion for props within the component.
   const theme = useTheme();
   const isBelowMd = useMediaQuery(theme.breakpoints.down("md"));
   return (
+   // The Box component is a generic, theme-aware container with access to CSS utilities from MUI System.
     <Box width={isBelowMd ? "80%" : "60%"} height={"100%"}>
       <Box
         sx={{
