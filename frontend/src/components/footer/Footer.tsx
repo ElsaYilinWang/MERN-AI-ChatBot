@@ -1,32 +1,43 @@
 import React from "react";
 import { Link } from "react-router-dom";
-// Link from react-router-dom is used to create navigational links in the React application
-// that are aware of the routing context.
-// It’s a great way to handle client-side navigation without refreshing the page.
 
+// Constants for styling to improve maintainability and reusability
+const FOOTER_STYLES = {
+  container: {
+    width: "100%",
+    padding: "20px",
+    minHeight: "20vh", 
+    maxHeight: "30vh",
+    marginTop: "50px"
+  },
+  text: {
+    fontSize: "30px",
+    textAlign: "center" as const,
+    padding: "30px"
+  },
+  link: {
+    color: "white"
+  }
+} as const;
 
-
-const Footer = () => {
+/**
+ * Footer component that displays attribution and reference link
+ * Uses React Router Link for client-side navigation
+ * Styled with consistent spacing and typography
+ */
+const Footer: React.FC = () => {
   return (
     <footer>
-      <div
-        style={{
-          width: "100%",
-          padding: 20,
-          minHeight: "20vh",
-          maxHeight: "30vh",
-          marginTop: 50,
-        }}
-      >
-        <p style={{ fontSize: "30px", textAlign: "center", padding: "30px" }}>
+      <div style={FOOTER_STYLES.container}>
+        <p style={FOOTER_STYLES.text}>
           Built with love by Elsa, reference:
           <span>
             <Link
-              style={{ color: "white" }}
+              style={FOOTER_STYLES.link}
               className="nav-link"
-              to={"https://www.youtube.com/watch?v=wrHTcjSZQ1Y"}
+              to="https://www.youtube.com/watch?v=wrHTcjSZQ1Y"
             >
-              Indian Coders
+        
             </Link>
           </span>
         </p>

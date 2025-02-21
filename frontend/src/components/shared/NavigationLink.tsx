@@ -1,22 +1,41 @@
 import { Link } from "react-router-dom";
 
-type Props = {
-  to: string;
-  bg: string;
-  text: string;
-  textColor: string;
-  onClick?: () => Promise<void>;
+// Define prop types for the navigation link component
+type NavigationLinkProps = {
+  to: string;      // Route path to navigate to
+  bg: string;      // Background color of the link
+  text: string;    // Text to display in the link
+  textColor: string; // Color of the link text
+  onClick?: () => Promise<void>; // Optional click handler
 };
 
-const NavigationLink = (props: Props) => {
+// Style object to keep styling consistent and reusable
+const LINK_STYLE = {
+  base: (bg: string, textColor: string) => ({
+    background: bg,
+    color: textColor,
+  })
+};
+
+/**
+ * NavigationLink component that wraps React Router Link
+ * with consistent styling and simplified props
+ */
+const NavigationLink: React.FC<NavigationLinkProps> = ({ 
+  to,
+  bg,
+  text,
+  textColor,
+  onClick
+}) => {
   return (
     <Link
-    onClick={props.onClick}
+      onClick={onClick}
       className="nav-link"
-      to={props.to}
-      style={{ background: props.bg, color: props.textColor }}
+      to={to}
+      style={LINK_STYLE.base(bg, textColor)}
     >
-      {props.text}
+      {text}
     </Link>
   );
 };

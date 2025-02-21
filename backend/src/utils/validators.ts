@@ -1,41 +1,65 @@
-// express-validator
-// ref: https://express-validator.github.io/docs/
+// Express validator middleware and utilities
+// Reference: https://express-validator.github.io/docs/
 import { NextFunction, Request, Response } from "express";
 import { body, ValidationChain, validationResult } from "express-validator";
 
-// create a custom validate for the validation chain
+/**
+ * Custom validation middleware that runs an array of validation chains
+ * Executes each validation sequentially and returns errors if any fail
+ * @param validations - Array of validation chains to execute
+ * @returns Express middleware function
+ */
 export const validate = (validations: ValidationChain[]) => {
     return async (req: Request, res: Response, next: NextFunction) => {
-        for (let validation of validations){
-            const result = await validation.run(req);
-            if (!result.isEmpty()) {
-                break;
-            }
-        }
+        // Execute all validations in parallel for better performance
+        await Promise.all(validations.map(validation => validation.run(req)));
+        
         const errors = validationResult(req);
-        if (errors.isEmpty()) { // No errors found
-            return next();  // run next middleware
+        if (errors.isEmpty()) {
+            return next();
         }
-        return res.status(422).json({ errors: errors.array()});
+        
+        // Return 422 Unprocessable Entity status with validation errors
+        return res.status(422).json({ errors: errors.array() });
     };
 };
 
-// create a validator for login 
+/**
+ * Login validation rules
+ * - Email must be valid format
+ * - Password must be at least 6 characters
+ */
 export const loginValidator = [
-    
-    body("email").trim().isEmail().withMessage("Email is required"),
-    body("password").trim().isLength({ min: 6}).withMessage("Password should contain at least 6 characters"),
+    body("email")
+        .trim()
+        .isEmail()
+        .withMessage("Please provide a valid email address"),
+    body("password")
+        .trim()
+        .isLength({ min: 6 })
+        .withMessage("Password must be at least 6 characters long"),
 ];
 
-
-// create a validator for signup process: name, email, password
+/**
+ * Signup validation rules
+ * Includes all login validations plus:
+ * - Name is required
+ */
 export const signupValidator = [
-    body("name").notEmpty().withMessage("Name is required"),
+    body("name")
+        .trim()
+        .notEmpty()
+        .withMessage("Name is required"),
     ...loginValidator
 ];
 
-// create a validator for chat: message
+/**
+ * Chat completion validation rules
+ * - Message content cannot be empty
+ */
 export const chatCompletionValidator = [
-    body("message").notEmpty().withMessage("Message is required"),
-    
+    body("message")
+        .trim()
+        .notEmpty()
+        .withMessage("Message content is required"),
 ];

@@ -7,11 +7,9 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  // useNavigate is a hook from react-router-dom that provides a way to programmatically navigate between routes in the application.
-  // It’s really handy for redirecting users after actions like form submissions or button clicks.
   const navigate = useNavigate();
-
   const auth = useAuth();
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -21,46 +19,58 @@ const Login = () => {
     try {
       toast.loading("Signing In!", { id: "login" });
       await auth?.login(email, password);
-      toast.success("Signed in successfully!", { id: "login"});
+      toast.success("Signed in successfully!", { id: "login" });
     } catch (error) {
-      console.log(error);
-      toast.error("Signed In Failed", { id: "login"});
+      console.error(error);
+      toast.error("Sign In Failed", { id: "login" });
     }
   };
 
   useEffect(() => {
-    if (auth?.user){
-      return navigate("/chat");
+    if (auth?.user) {
+      navigate("/chat");
     }
-  }, [auth]);
+  }, [auth, navigate]);
+
+  const formStyles = {
+    margin: "auto",
+    padding: "30px",
+    boxShadow: "10px 10px 20px #000",
+    borderRadius: "10px",
+    border: "none",
+  };
+
+  const buttonStyles = {
+    px: 2,
+    py: 1,
+    mt: 2,
+    width: "400px",
+    borderRadius: 2,
+    bgcolor: "#00fffc",
+    ":hover": {
+      bgcolor: "white",
+      color: "black",
+    },
+  };
 
   return (
-    <Box width={"100%"} height={"100%"} display="flex" flex={1}>
+    <Box width="100%" height="100%" display="flex" flex={1}>
       <Box padding={8} mt={8} display={{ md: "flex", sm: "none", xs: "none" }}>
         <img src="airobot.png" alt="Robot" style={{ width: "400px" }} />
       </Box>
       <Box
-        display={"felx"}
+        display="flex"
         flex={{ xs: 1, md: 0.5 }}
-        justifyContent={"center"}
-        alignItems={"center"}
+        justifyContent="center"
+        alignItems="center"
         padding={2}
-        ml={"auto"}
+        ml="auto"
         mt={16}
       >
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            margin: "auto",
-            padding: "30px",
-            boxShadow: "10px 10px 20px #000",
-            borderRadius: "10px",
-            border: "none",
-          }}
-        >
+        <form onSubmit={handleSubmit} style={formStyles}>
           <Box
             sx={{
-              display: "felx",
+              display: "flex",
               flexDirection: "column",
               justifyContent: "center",
             }}
@@ -77,18 +87,7 @@ const Login = () => {
             <CustomizedInput name="password" type="password" label="Password" />
             <Button
               type="submit"
-              sx={{
-                px: 2,
-                py: 1,
-                mt: 2,
-                width: "400px",
-                borderRadius: 2,
-                bgcolor: "#00fffc",
-                ":hover": {
-                  bgcolor: "white",
-                  color: "black",
-                },
-              }}
+              sx={buttonStyles}
               endIcon={<IoIosLogIn />}
             >
               LOGIN

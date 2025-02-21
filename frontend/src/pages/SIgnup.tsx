@@ -9,6 +9,28 @@ import { useNavigate } from "react-router-dom";
 const Signup = () => {
   const navigate = useNavigate();
   const auth = useAuth();
+
+  const formStyles = {
+    margin: "auto",
+    padding: "30px",
+    boxShadow: "10px 10px 20px #000",
+    borderRadius: "10px",
+    border: "none",
+  };
+
+  const buttonStyles = {
+    px: 2,
+    py: 1,
+    mt: 2,
+    width: "400px",
+    borderRadius: 2,
+    bgcolor: "#00fffc",
+    ":hover": {
+      bgcolor: "white",
+      color: "black",
+    },
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
@@ -19,46 +41,38 @@ const Signup = () => {
     try {
       toast.loading("Signing Up!", { id: "signup" });
       await auth?.signup(name, email, password);
-      toast.success("Signup successfully!", { id: "signup" });
+      toast.success("Signup successful!", { id: "signup" });
+      navigate("/chat");
     } catch (error) {
-      console.log(error);
-      toast.error("Signed up Failed", { id: "signup" });
+      console.error(error);
+      toast.error("Signup Failed", { id: "signup" });
     }
   };
 
   useEffect(() => {
     if (auth?.user) {
-      return navigate("/chat");
+      navigate("/chat");
     }
-  }, [auth]);
+  }, [auth, navigate]);
 
   return (
-    <Box width={"100%"} height={"100%"} display="flex" flex={1}>
+    <Box width="100%" height="100%" display="flex" flex={1}>
       <Box padding={8} mt={8} display={{ md: "flex", sm: "none", xs: "none" }}>
         <img src="airobot.png" alt="Robot" style={{ width: "400px" }} />
       </Box>
       <Box
-        display={"felx"}
+        display="flex"
         flex={{ xs: 1, md: 0.5 }}
-        justifyContent={"center"}
-        alignItems={"center"}
+        justifyContent="center"
+        alignItems="center"
         padding={2}
-        ml={"auto"}
+        ml="auto"
         mt={16}
       >
-        <form
-          onSubmit={handleSubmit}
-          style={{
-            margin: "auto",
-            padding: "30px",
-            boxShadow: "10px 10px 20px #000",
-            borderRadius: "10px",
-            border: "none",
-          }}
-        >
+        <form onSubmit={handleSubmit} style={formStyles}>
           <Box
             sx={{
-              display: "felx",
+              display: "flex",
               flexDirection: "column",
               justifyContent: "center",
             }}
@@ -76,18 +90,7 @@ const Signup = () => {
             <CustomizedInput name="password" type="password" label="Password" />
             <Button
               type="submit"
-              sx={{
-                px: 2,
-                py: 1,
-                mt: 2,
-                width: "400px",
-                borderRadius: 2,
-                bgcolor: "#00fffc",
-                ":hover": {
-                  bgcolor: "white",
-                  color: "black",
-                },
-              }}
+              sx={buttonStyles}
               endIcon={<IoIosLogIn />}
             >
               SIGNUP

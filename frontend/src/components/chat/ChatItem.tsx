@@ -1,93 +1,113 @@
 import { Avatar, Box, Typography } from "@mui/material";
-import React, { useLayoutEffect } from "react";
+import React from "react"; // Removed unused useLayoutEffect
 import { useAuth } from "../../context/AuthContext";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { coldarkDark } from "react-syntax-highlighter/dist/esm/styles/prism";
-import { getUserChats } from "../../helpers/api-communicator";
-import toast from "react-hot-toast";
+// Removed unused imports
 
+// Constants for styling to improve maintainability
+const CHAT_STYLES = {
+  container: {
+    display: "flex",
+    p: 2,
+    my: 2,
+    gap: 2
+  },
+  assistant: {
+    bgcolor: "#004d5612"
+  },
+  user: {
+    bgcolor: "#004d56"
+  },
+  avatar: {
+    ml: "0"
+  },
+  userAvatar: {
+    bgcolor: "black",
+    color: "white"
+  },
+  message: {
+    fontSize: "20px"
+  }
+} as const;
+
+/**
+ * Extracts code blocks from a message string
+ * Code blocks are denoted by triple backticks (```)
+ */
 function extractCodeFromString(message: string) {
   if (message.includes("```")) {
-    const blocks = message.split("```");
-    return blocks;
+    return message.split("```");
   }
+  return null;
 }
 
+/**
+ * Determines if a string is likely a code block based on common code characters
+ */
 function isCodeBlock(str: string) {
-  if (
-    str.includes("=") ||
-    str.includes(";") ||
-    str.includes("[") ||
-    str.includes("]") ||
-    str.includes("{") ||
-    str.includes("}") ||
-    str.includes("#") ||
-    str.includes("//")
-  ) {
-    return true;
-  }
-  return false;
+  const codeIndicators = ["=", ";", "[", "]", "{", "}", "#", "//"];
+  return codeIndicators.some(indicator => str.includes(indicator));
 }
 
-const ChatItem = ({
-  content,
-  role,
-}: {
+/**
+ * ChatItem component that displays a chat message with support for code blocks
+ * - Handles both user and assistant messages
+ * - Syntax highlighting for code blocks
+ * - Consistent styling with avatars
+ */
+const ChatItem: React.FC<{
   content: string;
   role: "user" | "assistant";
-}) => {
+}> = ({ content, role }) => {
   const messageBlocks = extractCodeFromString(content);
   const auth = useAuth();
 
-  return role === "assistant" ? (
-    <Box sx={{ display: "flex", p: 2, bgcolor: "#004d5612", my: 2, gap: 2 }}>
-      <Avatar sx={{ ml: "0" }}>
-        <img src="openai.png" alt="openai" width={"30px"} />
+  const isAssistant = role === "assistant";
+  
+  // Render message content - either as plain text or with code blocks
+  const renderContent = () => {
+    if (!messageBlocks) {
+      return <Typography sx={CHAT_STYLES.message}>{content}</Typography>;
+    }
+
+    return messageBlocks.map((block, index) =>
+      isCodeBlock(block) ? (
+        <SyntaxHighlighter 
+          key={index}
+          style={coldarkDark} 
+          language="javascript"
+        >
+          {block}
+        </SyntaxHighlighter>
+      ) : (
+        <Typography key={index} sx={CHAT_STYLES.message}>
+          {block}
+        </Typography>
+      )
+    );
+  };
+
+  return (
+    <Box sx={{
+      ...CHAT_STYLES.container,
+      ...(isAssistant ? CHAT_STYLES.assistant : CHAT_STYLES.user)
+    }}>
+      <Avatar sx={{
+        ...CHAT_STYLES.avatar,
+        ...(isAssistant ? {} : CHAT_STYLES.userAvatar)
+      }}>
+        {isAssistant ? (
+          <img src="openai.png" alt="openai" width={"30px"} />
+        ) : (
+          `${auth?.user?.name[0]}${auth?.user?.name.split(" ")[1][0]}`
+        )}
       </Avatar>
       <Box>
-        {!messageBlocks && ( // when we don't have message blocks
-          <Typography sx={{ fontSize: "20px" }}>{content}</Typography>
-        )}
-        {messageBlocks &&
-          messageBlocks.length &&
-          messageBlocks.map((block) =>
-            isCodeBlock(block) ? (
-              <SyntaxHighlighter style={coldarkDark} language="javascript">
-                {block}
-              </SyntaxHighlighter>
-            ) : (
-              <Typography sx={{ fontSize: "20px" }}>{block}</Typography>
-            )
-          )}
-      </Box>
-    </Box>
-  ) : (
-    <Box sx={{ display: "flex", p: 2, bgcolor: "#004d56", my: 2, gap: 2 }}>
-      <Avatar sx={{ ml: "0", bgcolor: "black", color: "white" }}>
-        {auth?.user?.name[0]}
-        {auth?.user?.name.split(" ")[1][0]}
-      </Avatar>
-      <Box>
-        {!messageBlocks && ( // when we don't have message blocks
-          <Typography sx={{ fontSize: "20px" }}>{content}</Typography>
-        )}
-        {messageBlocks &&
-          messageBlocks.length &&
-          messageBlocks.map((block) =>
-            isCodeBlock(block) ? (
-              <SyntaxHighlighter style={coldarkDark} language="javascript">
-                {block}
-              </SyntaxHighlighter>
-            ) : (
-              <Typography sx={{ fontSize: "20px" }}>{block}</Typography>
-            )
-          )}
+        {renderContent()}
       </Box>
     </Box>
   );
 };
 
 export default ChatItem;
-function setChatMessages(arg0: any[]) {
-  throw new Error("Function not implemented.");
-}

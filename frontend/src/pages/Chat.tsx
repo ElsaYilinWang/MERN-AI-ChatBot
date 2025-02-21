@@ -9,95 +9,96 @@ import {
   getUserChats,
   sendChatRequest,
 } from "../helpers/api-communicator";
-import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-/*
-const chatMessages = [
-  {
-    role: "user",
-    content: "Hello, can you help me with something?",
-  },
-  {
-    role: "assistant",
-    content: "Of course! What do you need assistance with?",
-  },
-  {
-    role: "user",
-    content: "I'm trying to understand how arrays work in JavaScript.",
-  },
-  {
-    role: "assistant",
-    content:
-      "An array in JavaScript is a data structure that can hold multiple values, and you can access these values using their index. Would you like an example?",
-  },
-  {
-    role: "user",
-    content: "Yes, that would be great!",
-  },
-  {
-    role: "assistant",
-    content:
-      "Sure! Here’s a simple example:\n```javascript\nlet fruits = ['apple', 'banana', 'cherry'];\nconsole.log(fruits[0]); // Outputs 'apple'\n```\nDoes this make sense?",
-  },
-  {
-    role: "user",
-    content: "Yes, thank you! That really helps.",
-  },
-];
-*/
+
+
+// Define Message type for chat messages
 type Message = {
   role: "user" | "assistant";
   content: string;
 };
+
+// Add this type at the top of the file, with your other types
+type ChatResponse = {
+  chats: Message[];
+};
+
+// Define Chat component
 const Chat: React.FC = () => {
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement | null>(null);
   const auth = useAuth();
   const [chatMessages, setChatMessages] = useState<Message[]>([]);
+
+  // Handle sending new messages
   const handleSubmit = async () => {
-    const content = inputRef.current?.value as string;
-    if (inputRef && inputRef.current) {
+    const content = inputRef.current?.value;
+    if (!content?.trim()) return; // Don't send empty messages
+
+    // Clear input field
+    if (inputRef.current) {
       inputRef.current.value = "";
     }
+
+    // Add user message immediately for better UX
     const newMessage: Message = { role: "user", content };
-    setChatMessages((prev) => [...prev, newMessage]);
-    const chatData = await sendChatRequest(content);
-    setChatMessages([...chatData.chats]);
-    //
+    setChatMessages(prev => [...prev, newMessage]);
+
+    try {
+      // Send message to API and update with response
+      const chatData = await sendChatRequest(content) as ChatResponse;
+      if (chatData?.chats) {
+        setChatMessages(chatData.chats);
+      }
+    } catch (error) {
+      toast.error("Failed to send message");
+      // Revert the message if sending fails
+      setChatMessages(prev => prev.slice(0, -1));
+    }
   };
 
+  // Handle deleting all chats
   const handleDeleteChats = async () => {
+    const toastId = "deletechats";
     try {
-      toast.loading("Deleting Chats", { id: "deletechats" });
+      toast.loading("Deleting Chats", { id: toastId });
       await deleteUserChats();
       setChatMessages([]);
-      toast.success("Deleted Chats Successfully", { id: "deletechats" });
+      toast.success("Deleted Chats Successfully", { id: toastId });
     } catch (error) {
-      console.log(error);
-      toast.error("Deleting chats failed", { id: "deletechats" });
+      console.error(error);
+      toast.error("Deleting chats failed", { id: toastId });
     }
   };
 
+  // Load existing chats on component mount
   useLayoutEffect(() => {
-    if (auth?.isLoggedIn && auth.user) {
-      toast.loading("Loading Chats", { id: "loadchats" });
-      getUserChats()
-        .then((data) => {
-          setChatMessages([...data.chats]);
-          toast.success("Successfully loaded chats", { id: "loadchats" });
-        })
-        .catch((err) => {
-          console.log(err);
-          toast.error("Loading Failed", { id: "loadchats" });
-        });
-    }
+    const loadChats = async () => {
+      if (!auth?.isLoggedIn || !auth.user) return;
+
+      const toastId = "loadchats";
+      try {
+        toast.loading("Loading Chats", { id: toastId });
+        const data = await getUserChats() as ChatResponse;
+        if (data?.chats) {
+          setChatMessages(data.chats);
+          toast.success("Successfully loaded chats", { id: toastId });
+        }
+      } catch (err) {
+        console.error(err);
+        toast.error("Loading Failed", { id: toastId });
+      }
+    };
+
+    loadChats();
   }, [auth]);
 
+  // Redirect to login if not authenticated
   useEffect(() => {
     if (!auth?.user) {
-      return navigate("/login");
+      navigate("/login");
     }
-  }, [auth]);
+  }, [auth, navigate]);
 
   return (
     <Box
@@ -112,8 +113,8 @@ const Chat: React.FC = () => {
     >
       <Box
         sx={{
-          display: { md: "felx", sm: "none", xs: "none" },
-          felx: 0.2,
+          display: { md: "flex", sm: "none", xs: "none" },
+          flex: 0.2,
           flexDirection: "column",
         }}
       >
@@ -138,7 +139,7 @@ const Chat: React.FC = () => {
             }}
           >
             {auth?.user?.name[0]}
-            {auth?.user?.name.split(" ")[1][0]}
+            {auth?.user?.name.split(" ")[1]?.[0]}
           </Avatar>
           <Typography sx={{ mx: "auto", fontFamily: "work sans" }}>
             You are talking to a ChatBOT...
@@ -167,7 +168,7 @@ const Chat: React.FC = () => {
       </Box>
       <Box
         sx={{
-          display: "felx",
+          display: "flex",
           flex: { md: 0.8, xs: 1, sm: 1 },
           flexDirection: "column",
           px: 3,
@@ -200,10 +201,11 @@ const Chat: React.FC = () => {
           }}
         >
           {chatMessages.map((chat, index) => (
-            //@ts-ignore
-            // this comment enables the TypeScript compiler to ignore the line below it.
-            // otherwise, role will have a type error
-            <ChatItem content={chat.content} role={chat.role} key={index} />
+            <ChatItem 
+              content={chat.content} 
+              role={chat.role} 
+              key={index} 
+            />
           ))}
         </Box>
         <div
@@ -215,7 +217,6 @@ const Chat: React.FC = () => {
             margin: "auto",
           }}
         >
-          {" "}
           <input
             ref={inputRef}
             type="text"

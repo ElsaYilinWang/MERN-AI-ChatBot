@@ -1,75 +1,62 @@
 import axios from "axios";
 
-export const loginUser = async (email: string, password: string) => {
-  const res = await axios.post("/user/login", { email, password });
-  if (res.status !== 200) {
-    throw new Error("Unable to login");
-  }
+// API endpoints configuration
+const API_ENDPOINTS = {
+  LOGIN: "/user/login",
+  AUTH_STATUS: "/user/auth-status", 
+  CHAT_NEW: "/chat/new",
+  CHAT_ALL: "/chat/all-chats",
+  CHAT_DELETE: "/chat/delete",
+  LOGOUT: "/user/logout",
+  SIGNUP: "/user/signup"
+} as const;
 
-  const data = await res.data;
-  return data;
+// Generic API request handler to reduce code duplication
+const makeRequest = async <T>(
+  method: 'get' | 'post' | 'delete',
+  url: string,
+  data?: object,
+  errorMessage?: string
+): Promise<T> => {
+  try {
+    const config = {
+      method,
+      url,
+      data,
+    };
+    
+    const response = await axios(config);
+    const expectedStatus = method === 'post' && url === API_ENDPOINTS.SIGNUP ? 201 : 200;
+    
+    if (response.status !== expectedStatus) {
+      throw new Error(errorMessage || `Request failed with status ${response.status}`);
+    }
+    
+    return response.data;
+  } catch (error) {
+    throw new Error(errorMessage || 'Request failed');
+  }
 };
 
-export const checkAuthStatus = async () => {
-  const res = await axios.get("/user/auth-status");
-  if (res.status !== 200) {
-    throw new Error("Unable to login");
-  }
+// User authentication related functions
+export const loginUser = async (email: string, password: string) => 
+  makeRequest('post', API_ENDPOINTS.LOGIN, { email, password }, 'Unable to login');
 
-  const data = await res.data;
-  return data;
-};
+export const checkAuthStatus = async () => 
+  makeRequest('get', API_ENDPOINTS.AUTH_STATUS, undefined, 'Unable to authenticate');
 
-export const sendChatRequest = async (message: string) => {
-  const res = await axios.post("/chat/new", { message });
-  if (res.status !== 200) {
-    throw new Error("Unable to send chat");
-  }
+export const logoutUser = async () => 
+  makeRequest('get', API_ENDPOINTS.LOGOUT, undefined, 'Unable to logout user');
 
-  const data = await res.data;
-  return data;
-};
+export const signupUser = async (name: string, email: string, password: string) => 
+  makeRequest('post', API_ENDPOINTS.SIGNUP, { name, email, password }, 'Unable to signup');
 
-export const getUserChats = async () => {
-  const res = await axios.get("/chat/all-chats");
-  if (res.status !== 200) {
-    throw new Error("Unable to send chat");
-  }
+// Chat related functions
+export const sendChatRequest = async (message: string) => 
+  makeRequest('post', API_ENDPOINTS.CHAT_NEW, { message }, 'Unable to send chat');
 
-  const data = await res.data;
-  return data;
-};
+export const getUserChats = async () => 
+  makeRequest('get', API_ENDPOINTS.CHAT_ALL, undefined, 'Unable to fetch chats');
 
-export const deleteUserChats = async () => {
-  const res = await axios.delete("/chat/delete");
-  if (res.status !== 200) {
-    throw new Error("Unable to delete chat");
-  }
-
-  const data = await res.data;
-  return data;
-};
-
-export const logoutUser = async () => {
-  const res = await axios.get("/user/logout");
-  if (res.status !== 200) {
-    throw new Error("Unable to logout user.");
-  }
-
-  const data = await res.data;
-  return data;
-};
-
-export const signupUser = async (
-  name: string,
-  email: string,
-  password: string
-) => {
-  const res = await axios.post("/user/signup", { name, email, password });
-  if (res.status !== 201) {
-    throw new Error("Unable to signup");
-  }
-
-  const data = await res.data;
-  return data;
-};
+export const deleteUserChats = async () => 
+  makeRequest('delete', API_ENDPOINTS.CHAT_DELETE, undefined, 'Unable to delete chat');

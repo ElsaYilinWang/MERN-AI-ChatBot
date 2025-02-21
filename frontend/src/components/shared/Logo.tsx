@@ -2,33 +2,47 @@ import { Typography } from "@mui/material";
 import React from "react";
 import { Link } from "react-router-dom";
 
-const Logo = () => {
+// Constants for styling to improve maintainability and reusability
+const LOGO_STYLES = {
+  container: {
+    display: "flex",
+    marginRight: "auto", 
+    alignItems: "center",
+    gap: "8px"
+  },
+  image: {
+    width: "30px",
+    height: "30px"
+  },
+  text: {
+    display: { md: "block", sm: "none", xs: "none" },
+    mr: "auto",
+    fontWeight: "800",
+    textShadow: "2px 2px 20px #000"
+  },
+  mernText: {
+    fontSize: "20px"
+  }
+} as const;
+
+/**
+ * Logo component that displays the app logo and title
+ * - Image links to home page
+ * - Responsive text that hides on smaller screens
+ * - Consistent styling with shadow effects
+ */
+const Logo: React.FC = () => {
   return (
-    <div
-      style={{
-        display: "flex",
-        marginRight: "auto",
-        alignItems: "center",
-        gap: "8px",
-      }}
-    >
-      <Link to={"/"}>
+    <div style={LOGO_STYLES.container}>
+      <Link to="/">
         <img
           src="openai.png"
           alt="open-ai"
-          width={"30px"}
-          height={"30px"}
+          style={LOGO_STYLES.image}
           className="image-inverted"
         />
-        <Typography
-          sx={{
-            display: { md: "block", sm: "none", xs: "none" },
-            mr: "auto",
-            fontWeight: "800",
-            textShadow: "2px 2px 20px #000",
-          }}
-        >
-          <span style={{ fontSize: "20px" }}>MERN</span>-GPT
+        <Typography sx={LOGO_STYLES.text}>
+          <span style={LOGO_STYLES.mernText}>MERN</span>-GPT
         </Typography>
       </Link>
     </div>

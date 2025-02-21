@@ -4,92 +4,92 @@ import { hash, compare } from "bcrypt";
 import { createToken } from "../utils/token-manager.js";
 import { COOKIE_NAME } from "../utils/constants.js";
 
+/**
+ * Retrieves all users from the database
+ * Used for admin/debugging purposes
+ */
 export const getAllUsers = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // get all users
     const users = await User.find();
-
-    // issue: This expression is not callable. Type 'Number' has no call signatures
-    // solution: import { Response } from "express"
-    // ref: https://stackoverflow.com/questions/60463324/this-expression-is-not-callable-type-number-has-no-call-signatures
     return res.status(200).json({ message: "OK", users });
-
-    // issue: 'error' is of Type 'Unknown'
-    // solution: narrow down error's type by " error: any"
   } catch (error: any) {
-    console.log(error);
+    console.error('Error getting users:', error);
     return res.status(404).json({ message: "ERROR", cause: error.message });
   }
 };
 
+/**
+ * Creates a new user account
+ * Validates email uniqueness and hashes password before saving
+ */
 export const userSignup = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // user signup
-    // from req body: name, email, password
     const { name, email, password } = req.body;
 
-    // find if the user is existing
+    // Check for existing user
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(401).send("User already existed!");
+      return res.status(401).send("User already exists");
     }
 
-    // password needs encryption so import 'hash' from bcrypt
+    // Create new user with hashed password
     const hashedPassword = await hash(password, 10);
+    const user = await User.create({ 
+      name, 
+      email, 
+      password: hashedPassword 
+    });
 
-    // create a new user, following userSchema, with hashed password
-    const user = new User({ name, email, password: hashedPassword });
-
-    // save the user
-    await user.save();
-
-    // issue: This expression is not callable. Type 'Number' has no call signatures
-    // solution: import { Response } from "express"
-    // ref: https://stackoverflow.com/questions/60463324/this-expression-is-not-callable-type-number-has-no-call-signatures
-    return res.status(200).json({
-      message: "OK",
+    return res.status(201).json({
+      message: "User created successfully",
       id: user._id.toString(),
       name: user.name,
       email: user.email,
     });
-
-    // issue: 'error' is of Type 'Unknown'
-    // solution: narrow down error's type by " error: any"
   } catch (error: any) {
-    console.log(error);
+    console.error('Signup error:', error);
     return res.status(404).json({ message: "ERROR", cause: error.message });
   }
 };
 
+/**
+ * Authenticates user login
+ * Validates credentials and sets authentication cookie
+ */
 export const userLogin = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // user login by email and password
-    const { email, password } = req.body();
+    const { email, password } = req.body;
+    
+    // Validate user exists
     const user = await User.findOne({ email });
-
     if (!user) {
-      return res.status(401).send("User not registered.");
+      return res.status(401).send("User not registered");
     }
 
-    // validate password, import 'compare' from "bcrypt"
+    // Validate password
     const isPasswordCorrect = await compare(password, user.password);
     if (!isPasswordCorrect) {
-      return res.status(403).send("Incorrect Password");
+      return res.status(403).send("Incorrect password");
     }
 
-    // clear the old cookie after login
+    // Set authentication cookie
+    const token = createToken(user._id.toString(), user.email, "7d");
+    const expires = new Date();
+    expires.setDate(expires.getDate() + 7);
+
+    // Clear any existing cookie first
     res.clearCookie(COOKIE_NAME, {
       path: "/",
       domain: "localhost",
@@ -97,10 +97,7 @@ export const userLogin = async (
       signed: true,
     });
 
-    // Authentication Process: create token and store cookie
-    const token = createToken(user._id.toString(), user.email, "7d");
-    const expires = new Date();
-    expires.setDate(expires.getDate() + 7);
+    // Set new cookie
     res.cookie(COOKIE_NAME, token, {
       path: "/",
       domain: "localhost",
@@ -109,70 +106,75 @@ export const userLogin = async (
       signed: true,
     });
 
-    // if all pass validation checks
     return res.status(200).json({
-      message: "OK",
+      message: "Login successful",
       id: user._id.toString(),
       name: user.name,
       email: user.email,
     });
   } catch (error: any) {
-    console.log(error);
+    console.error('Login error:', error);
     return res.status(404).json({ message: "ERROR", cause: error.message });
   }
 };
 
+/**
+ * Verifies user authentication status
+ * Checks if user exists and has proper permissions
+ */
 export const verifyUser = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // find user by id
     const user = await User.findById(res.locals.jwtData.id);
-
     if (!user) {
       return res
         .status(401)
-        .send("User not registered OR token malfunctioned.");
+        .send("User not registered OR token malfunctioned");
     }
 
+    // Verify user has proper permissions
     if (user._id.toString() !== res.locals.jwtData.id) {
-      return res.status(401).send("Permission didn't match.");
+      return res.status(401).send("Permission denied");
     }
 
-    // if all pass validation checks
     return res.status(200).json({
-      message: "OK",
+      message: "User verified",
       id: user._id.toString(),
       name: user.name,
       email: user.email,
     });
   } catch (error: any) {
-    console.log(error);
+    console.error('Verification error:', error);
     return res.status(404).json({ message: "ERROR", cause: error.message });
   }
 };
 
+/**
+ * Logs out user by clearing authentication cookie
+ * Verifies user exists and has proper permissions before logout
+ */
 export const userLogout = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // find user by id
     const user = await User.findById(res.locals.jwtData.id);
-
     if (!user) {
       return res
         .status(401)
-        .send("User not registered OR token malfunctioned.");
+        .send("User not registered OR token malfunctioned");
     }
 
+    // Verify user has proper permissions
     if (user._id.toString() !== res.locals.jwtData.id) {
-      return res.status(401).send("Permission didn't match.");
+      return res.status(401).send("Permission denied");
     }
 
+    // Clear authentication cookie
     res.clearCookie(COOKIE_NAME, {
       path: "/",
       domain: "localhost",
@@ -180,15 +182,14 @@ export const userLogout = async (
       signed: true,
     });
 
-    // if all pass validation checks
     return res.status(200).json({
-      message: "OK",
+      message: "Logout successful",
       id: user._id.toString(),
       name: user.name,
       email: user.email,
     });
   } catch (error: any) {
-    console.log(error);
+    console.error('Logout error:', error);
     return res.status(404).json({ message: "ERROR", cause: error.message });
   }
 };

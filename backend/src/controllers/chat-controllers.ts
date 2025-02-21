@@ -7,6 +7,10 @@ import {
   OpenAIApi,
 } from "openai";
 
+/**
+ * Generates a chat completion using OpenAI API
+ * Takes user message, adds to chat history, gets AI response and saves
+ */
 export const generateChatCompletion = async (
   req: Request,
   res: Response,
@@ -15,101 +19,108 @@ export const generateChatCompletion = async (
   const { message } = req.body;
 
   try {
+    // Verify user exists and is authenticated
     const user = await User.findById(res.locals.jwtData.id);
     if (!user) {
       return res
         .status(401)
         .json({ message: "User not registered OR Token malfunctioned" });
     }
-    // grab chats of user
+
+    // Format chat history for OpenAI API
     const chats = user.chats.map(({ role, content }) => ({
       role,
       content,
     })) as ChatCompletionRequestMessage[];
-    chats.push({ content: message, role: "user" });
-    user.chats.push({ content: message, role: "user" });
+    
+    // Add new user message
+    const newMessage = { content: message, role: "user" } as ChatCompletionRequestMessage;
+    chats.push(newMessage);
+    user.chats.push(newMessage);
 
-    // send all chats with new one to openAI API
-    const config = configureOpenAI();
-    const openai = new OpenAIApi(config);
 
-    // get latest response
+    // Get AI response
+    const openai = new OpenAIApi(configureOpenAI());
     const chatResponse = await openai.createChatCompletion({
       model: "gpt-3.5-turbo",
       messages: chats,
     });
 
-    user.chats.push(
-      chatResponse.data.choices[0].message as ChatCompletionResponseMessage
-    );
+    // Save AI response to user's chat history
+    const aiMessage = chatResponse.data.choices[0].message as ChatCompletionResponseMessage;
+    user.chats.push(aiMessage);
     await user.save();
+
     return res.status(200).json({ chats: user.chats });
   } catch (error) {
-    console.log(error);
+    console.error('Chat completion error:', error);
     return res.status(500).json({ message: "Something went wrong" });
   }
 };
 
+/**
+ * Retrieves chat history for authenticated user
+ * Verifies user permissions before returning chats
+ */
 export const sendChatsToUser = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // find user by id
     const user = await User.findById(res.locals.jwtData.id);
-
     if (!user) {
       return res
         .status(401)
         .send("User not registered OR token malfunctioned.");
     }
 
+    // Verify user has permission to access these chats
     if (user._id.toString() !== res.locals.jwtData.id) {
       return res.status(401).send("Permission didn't match.");
     }
 
-    // if all pass validation checks
     return res.status(200).json({
       message: "OK",
       chats: user.chats,
     });
   } catch (error: any) {
-    console.log(error);
+    console.error('Error retrieving chats:', error);
     return res.status(404).json({ message: "ERROR", cause: error.message });
   }
 };
 
+/**
+ * Deletes all chats for authenticated user
+ * Verifies user permissions before clearing chat history
+ */
 export const deleteChats = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    // find user by id
     const user = await User.findById(res.locals.jwtData.id);
-
     if (!user) {
       return res
         .status(401)
         .send("User not registered OR token malfunctioned.");
     }
 
+    // Verify user has permission to delete these chats
     if (user._id.toString() !== res.locals.jwtData.id) {
       return res.status(401).send("Permission didn't match.");
     }
-    // set user's chats back to an empty array and save === delete
-    //@ts-ignore
-    user.chats = [];
+
+    // Clear chat history
+    user.chats = [] as any;
     await user.save();
 
-    // if all pass validation checks
     return res.status(200).json({
-      message: "OK",
-      // no user chats required
+      message: "OK"
     });
   } catch (error: any) {
-    console.log(error);
+    console.error('Error deleting chats:', error);
     return res.status(404).json({ message: "ERROR", cause: error.message });
   }
 };
